@@ -31,13 +31,12 @@ const PRESET_COLORS = [
 // ══════════════════════════════════════
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDPVVKdc-VT-RqqrXN-nooEHi5MAU2sr30",
-  authDomain: "dashboard-89af8.firebaseapp.com",
-  projectId: "dashboard-89af8",
-  storageBucket: "dashboard-89af8.firebasestorage.app",
-  messagingSenderId: "666270498098",
-  appId: "1:666270498098:web:27be87c4f0690da19b9b8d",
-  measurementId: "G-HCJ58HRV84"
+  apiKey: "AIzaSyDPVVKdc-VT-RqqrXN-nooEHi5MAU2sr30",
+  authDomain: "my-project-dashboard-b971a.firebaseapp.com",
+  projectId: "my-project-dashboard-b971a",
+  storageBucket: "my-project-dashboard-b971a.firebasestorage.app",
+  messagingSenderId: "316403017474",
+  appId: "1:316403017474:web:970829e799eed30e78041b"
 };
 
 firebase.initializeApp(firebaseConfig);
