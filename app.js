@@ -31,7 +31,7 @@ const PRESET_COLORS = [
 // ══════════════════════════════════════
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCE6yToFnCG1kUqQHBVU7yMKQMPbSALJf8",
+  apiKey: "AIzaSyDPVVKdc-VT-RqqrXN-nooEHi5MAU2sr30",
   authDomain: "dashboard-89af8.firebaseapp.com",
   projectId: "dashboard-89af8",
   storageBucket: "dashboard-89af8.firebasestorage.app",
