@@ -1,6 +1,6 @@
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    CSS Variables
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 :root {
   --color-bg: #F1F5F9;
   --color-surface: #FFFFFF;
@@ -17,9 +17,9 @@
   --lane-width: 300px;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Reset & Base
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -85,9 +85,9 @@ input, textarea {
   color: inherit;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Focus Visible (Accessibility)
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -99,9 +99,9 @@ textarea:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Storage Warning Banner
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .storage-warning-banner {
   display: flex;
   align-items: center;
@@ -132,9 +132,9 @@ textarea:focus:not(:focus-visible) {
   background: #FEE2E2;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Navbar
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .navbar {
   position: sticky;
   top: 0;
@@ -237,6 +237,77 @@ textarea:focus:not(:focus-visible) {
   color: var(--color-text-secondary);
 }
 
+/* Auth Area */
+.auth-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-btn {
+  padding: 6px 12px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.auth-btn-logout {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.auth-btn-logout:hover {
+  background: var(--color-border);
+  box-shadow: none;
+  opacity: 1;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-profile[hidden] {
+  display: none;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-sync-status {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 10px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
 .settings-btn {
   font-size: 20px;
   padding: 4px;
@@ -248,9 +319,9 @@ textarea:focus:not(:focus-visible) {
   background: var(--color-bg);
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Summary Bar
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .summary-bar {
   display: flex;
   align-items: center;
@@ -355,9 +426,9 @@ textarea:focus:not(:focus-visible) {
   white-space: nowrap;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Main Content
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 #main-content {
   flex: 1;
 }
@@ -371,9 +442,9 @@ textarea:focus:not(:focus-visible) {
   align-content: flex-start;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Welcome Empty State
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .welcome-empty {
   display: flex;
   flex-direction: column;
@@ -421,9 +492,9 @@ textarea:focus:not(:focus-visible) {
   box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Project Lane
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .project-lane {
   width: var(--lane-width);
   min-width: var(--lane-width);
@@ -576,9 +647,9 @@ textarea:focus:not(:focus-visible) {
   padding: 20px 0;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Lane Dropdown Menu
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .lane-dropdown {
   position: absolute;
   top: 100%;
@@ -623,9 +694,9 @@ textarea:focus:not(:focus-visible) {
   margin: 4px 0;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Color Popover
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .color-popover {
   position: absolute;
   top: 100%;
@@ -701,9 +772,9 @@ textarea:focus:not(:focus-visible) {
   background: none;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Archive Section
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .archive-section {
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -817,9 +888,9 @@ textarea:focus:not(:focus-visible) {
   background: #FEF2F2;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Modal
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -945,9 +1016,9 @@ textarea:focus:not(:focus-visible) {
   line-height: 1.5;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Settings Modal
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .settings-actions {
   display: flex;
   flex-direction: column;
@@ -1017,9 +1088,9 @@ textarea:focus:not(:focus-visible) {
   color: var(--color-text-secondary);
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Card Styles
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .card {
   background: var(--color-surface);
   border-left: 4px solid transparent;
@@ -1278,9 +1349,9 @@ textarea:focus:not(:focus-visible) {
   background: var(--color-border);
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Quick Add
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .quick-add {
   padding: 8px 14px 12px;
   flex-shrink: 0;
@@ -1410,9 +1481,9 @@ textarea:focus:not(:focus-visible) {
   opacity: 0.9;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Focus View
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .focus-view {
   max-width: 800px;
   margin: 0 auto;
@@ -1492,9 +1563,9 @@ textarea:focus:not(:focus-visible) {
   max-width: 100%;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Today & Schedule & Search Views
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 .list-view {
   max-width: 800px;
   margin: 0 auto;
@@ -1597,9 +1668,9 @@ textarea:focus:not(:focus-visible) {
   padding: 0 1px;
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Animations
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1646,9 +1717,9 @@ textarea:focus:not(:focus-visible) {
   80% { transform: translateX(4px); }
 }
 
-/* ══════════════════════════════════════
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧
    Responsive
-   ══════════════════════════════════════ */
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 
 /* Small mobile < 480px */
 @media (max-width: 479px) {
@@ -1706,6 +1777,20 @@ textarea:focus:not(:focus-visible) {
 
   .settings-btn {
     font-size: 18px;
+  }
+
+  .auth-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .user-avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .user-name {
+    display: none;
   }
 
   .summary-bar {
