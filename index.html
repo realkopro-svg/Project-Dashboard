@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프로젝트 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+<div id="page-wrapper">
+
+  <!-- 저장 공간 경고 배너 -->
+  <div class="storage-warning-banner" id="storage-warning" hidden>
+    <span>⚠️ 저장 공간이 부족합니다. 아카이브된 프로젝트를 삭제하거나 데이터를 백업 후 정리해 주세요.</span>
+    <button class="storage-warning-close" id="storage-warning-close" aria-label="경고 닫기">×</button>
+  </div>
+
+  <!-- 상단 네비게이션 -->
+  <header class="navbar">
+    <div class="navbar-left">
+      <h1 class="app-title">📊 프로젝트 대시보드</h1>
+      <span class="navbar-date" id="navbar-date"></span>
+    </div>
+    <nav class="navbar-center">
+      <div class="view-tabs" role="tablist" aria-label="뷰 전환">
+        <button class="view-tab active" data-view="dashboard" role="tab" aria-selected="true">대시보드</button>
+        <button class="view-tab" data-view="today" role="tab" aria-selected="false">오늘</button>
+        <button class="view-tab" data-view="schedule" role="tab" aria-selected="false">일정</button>
+      </div>
+    </nav>
+    <div class="navbar-right">
+      <div class="search-box">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="text" id="search-input" placeholder="카드 검색..." autocomplete="off" aria-label="카드 검색">
+      </div>
+      <button class="settings-btn" id="settings-btn" aria-label="설정">⚙️</button>
+    </div>
+  </header>
+
+  <!-- 전체 요약 바 -->
+  <section class="summary-bar" aria-label="전체 진행 현황">
+    <div class="summary-left">
+      <div class="summary-progress">
+        <div class="summary-progress-bar" id="summary-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="summary-progress-fill" id="summary-progress-fill"></div>
+        </div>
+        <span class="summary-progress-text" id="summary-progress-text">완료 0 / 전체 0 — 0%</span>
+      </div>
+    </div>
+    <div class="summary-right">
+      <div class="project-dots" id="project-dots"></div>
+      <button class="add-project-btn" id="add-project-btn" aria-label="새 프로젝트 추가">+ 프로젝트 추가</button>
+    </div>
+  </section>
+
+  <!-- 메인 콘텐츠 -->
+  <main id="main-content">
+    <div class="board-container" id="board-container"></div>
+  </main>
+
+  <!-- 아카이브 영역 -->
+  <aside class="archive-section" id="archive-section" hidden>
+    <button class="archive-toggle" id="archive-toggle" aria-expanded="false" aria-label="아카이브 목록 토글">
+      📦 아카이브 (<span id="archive-count">0</span>개)
+      <span class="archive-arrow" id="archive-arrow" aria-hidden="true">▶</span>
+    </button>
+    <div class="archive-list" id="archive-list"></div>
+  </aside>
+
+</div>
+
+  <!-- 모달 오버레이 -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  </div>
+
+</body>
+</html>
