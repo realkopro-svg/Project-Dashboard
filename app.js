@@ -27,6 +27,27 @@ const PRESET_COLORS = [
 ];
 
 // ══════════════════════════════════════
+//  Firebase
+// ══════════════════════════════════════
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCE6yToFnCG1kUqQHBVU7yMKQMPbSALJf8",
+  authDomain: "dashboard-89af8.firebaseapp.com",
+  projectId: "dashboard-89af8",
+  storageBucket: "dashboard-89af8.firebasestorage.app",
+  messagingSenderId: "666270498098",
+  appId: "1:666270498098:web:27be87c4f0690da19b9b8d",
+  measurementId: "G-HCJ58HRV84"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/** @type {firebase.User|null} */
+let currentUser = null;
+
+// ══════════════════════════════════════
 //  State
 // ══════════════════════════════════════
 
@@ -246,15 +267,20 @@ function shakeElement(element) {
 //  Storage Layer
 // ══════════════════════════════════════
 
-/** Save state to localStorage. */
+/** Save state to localStorage (always) and Firestore (if logged in). */
 function saveState() {
   state.updatedAt = new Date().toISOString();
+  // 항상 localStorage에 저장 (캐시/오프라인 용)
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
     if (e.name === 'QuotaExceededError') {
       alert('저장 공간이 부족합니다. 아카이브된 프로젝트를 삭제하거나 데이터를 백업 후 정리해 주세요.');
     }
+  }
+  // 로그인 상태면 Firestore에도 저장
+  if (currentUser) {
+    saveToFirestore();
   }
 }
 
@@ -295,6 +321,105 @@ function checkStorageUsage() {
 function getStorageUsageKB() {
   const data = localStorage.getItem(STORAGE_KEY) || '';
   return Math.round(new Blob([data]).size / 1024);
+}
+
+// ══════════════════════════════════════
+//  Firestore Sync
+// ══════════════════════════════════════
+
+/** Debounced Firestore save timer. */
+let _firestoreSaveTimer = null;
+
+/** Save state to Firestore with 500ms debounce. */
+function saveToFirestore() {
+  if (!currentUser) return;
+  clearTimeout(_firestoreSaveTimer);
+  _firestoreSaveTimer = setTimeout(() => {
+    const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
+    docRef.set(JSON.parse(JSON.stringify(state))).catch(err => {
+      console.warn('Firestore 저장 실패 (localStorage 캐시는 유지됨):', err);
+    });
+  }, 500);
+}
+
+/**
+ * Load state from Firestore and handle conflict with localStorage.
+ * @returns {Promise<void>}
+ */
+async function loadFromFirestore() {
+  if (!currentUser) return;
+  try {
+    const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
+    const doc = await docRef.get();
+    if (doc.exists) {
+      const remoteData = doc.data();
+      const remoteTime = remoteData.updatedAt ? new Date(remoteData.updatedAt).getTime() : 0;
+      const localTime = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
+
+      if (remoteTime >= localTime) {
+        // Firestore 데이터가 더 최신이거나 같으면 → Firestore 데이터 사용
+        state.projects = remoteData.projects || [];
+        state.archive = remoteData.archive || [];
+        state.columns = remoteData.columns || null;
+        state.settings = remoteData.settings || state.settings;
+        state.version = remoteData.version || '2.0';
+        state.updatedAt = remoteData.updatedAt || new Date().toISOString();
+        activeView = state.settings.lastActiveView || VIEWS.DASHBOARD;
+        focusedProjectId = state.settings.lastFocusedProject || null;
+        // localStorage도 동기화
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+      } else {
+        // localStorage가 더 최신이면 → Firestore에 업로드
+        saveToFirestore();
+      }
+    } else {
+      // 첫 로그인 (Firestore에 문서 없음) → localStorage 데이터를 Firestore에 업로드
+      saveToFirestore();
+    }
+    renderAll();
+  } catch (err) {
+    console.warn('Firestore 로드 실패:', err);
+  }
+}
+
+// ══════════════════════════════════════
+//  Auth Functions
+// ══════════════════════════════════════
+
+/** Sign in with Google popup. */
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    if (err.code !== 'auth/popup-closed-by-user') {
+      console.error('로그인 오류:', err);
+      alert('로그인에 실패했습니다: ' + err.message);
+    }
+  });
+}
+
+/** Sign out from Firebase. */
+function signOutUser() {
+  auth.signOut().catch(err => {
+    console.error('로그아웃 오류:', err);
+  });
+}
+
+/** Update auth UI based on login state. */
+function updateAuthUI(user) {
+  const loginBtn = document.getElementById('login-btn');
+  const userProfile = document.getElementById('user-profile');
+  const userAvatar = document.getElementById('user-avatar');
+  const userName = document.getElementById('user-name');
+
+  if (user) {
+    loginBtn.hidden = true;
+    userProfile.hidden = false;
+    userAvatar.src = user.photoURL || '';
+    userName.textContent = user.displayName || user.email || '';
+  } else {
+    loginBtn.hidden = false;
+    userProfile.hidden = true;
+  }
 }
 
 // ══════════════════════════════════════
@@ -1190,6 +1315,15 @@ function showSettingsModal() {
     container.setAttribute('aria-label', '설정');
     const title = el('h2', { className: 'modal-title', text: '\u2699\uFE0F 설정' });
 
+    // Sync status
+    const syncStatus = el('div', { className: 'settings-sync-status' });
+    if (currentUser) {
+      syncStatus.textContent = `☁️ Google 계정으로 동기화 중 (${currentUser.displayName || currentUser.email})`;
+    } else {
+      syncStatus.textContent = '💾 로컬 저장 모드 (로그인하면 클라우드 동기화)';
+    }
+    container.appendChild(syncStatus);
+
     // Action buttons
     const actionsDiv = el('div', { className: 'settings-actions' });
 
@@ -2053,6 +2187,25 @@ document.addEventListener('DOMContentLoaded', () => {
     navbarDate.textContent = formatDateKR(new Date().toISOString());
   }
 
+  // localStorage에서 즉시 로드 (빠른 첫 렌더링)
   loadState();
   renderAll();
+
+  // Auth 버튼 이벤트 바인딩
+  document.getElementById('login-btn').addEventListener('click', signInWithGoogle);
+  document.getElementById('logout-btn').addEventListener('click', signOutUser);
+
+  // Auth 상태 리스너
+  auth.onAuthStateChanged(user => {
+    currentUser = user || null;
+    updateAuthUI(user);
+    if (user) {
+      // 로그인 시 Firestore에서 데이터 로드 (충돌 처리 포함)
+      loadFromFirestore();
+    } else {
+      // 로그아웃 시 localStorage에서 다시 로드
+      loadState();
+      renderAll();
+    }
+  });
 });
