@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>프로젝트 대시보드</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -33,6 +36,14 @@
       <div class="search-box">
         <span class="search-icon" aria-hidden="true">🔍</span>
         <input type="text" id="search-input" placeholder="카드 검색..." autocomplete="off" aria-label="카드 검색">
+      </div>
+      <div class="auth-area" id="auth-area">
+        <button class="auth-btn" id="login-btn">Google 로그인</button>
+        <div class="user-profile" id="user-profile" hidden>
+          <img class="user-avatar" id="user-avatar" alt="프로필">
+          <span class="user-name" id="user-name"></span>
+          <button class="auth-btn auth-btn-logout" id="logout-btn">로그아웃</button>
+        </div>
       </div>
       <button class="settings-btn" id="settings-btn" aria-label="설정">⚙️</button>
     </div>
