@@ -463,11 +463,10 @@ async function syncFromCloud() {
   }
   try {
     if (currentUser) {
+      // localStorage를 건드리지 않고 바로 Firestore에서 불러오기
       await loadFromFirestore(true);
-    } else {
-      loadState();
-      renderAll();
     }
+    // 로그인 안 된 상태에서는 아무것도 하지 않음
   } finally {
     if (syncBtn) {
       syncBtn.disabled = false;
@@ -2251,13 +2250,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sync-btn').addEventListener('click', syncFromCloud);
 
   // Auth 상태 리스너
-  auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(async (user) => {
     console.log('[Auth] 상태 변경:', user ? user.email : '로그아웃');
     currentUser = user || null;
     updateAuthUI(user);
     if (user) {
       // 로그인 시 무조건 Firestore 데이터 우선 적용
-      loadFromFirestore(true);
+      await loadFromFirestore(true);
     } else {
       // 로그아웃 시 localStorage에서 다시 로드
       loadState();
