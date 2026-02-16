@@ -237,6 +237,25 @@ textarea:focus:not(:focus-visible) {
   color: var(--color-text-secondary);
 }
 
+.search-clear {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  padding: 2px 4px;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.search-clear:hover {
+  color: var(--color-text);
+  background: var(--color-border);
+}
+
+.search-clear[hidden] {
+  display: none;
+}
+
 /* Auth Area */
 .auth-area {
   display: flex;
