@@ -2077,29 +2077,40 @@ textarea:focus:not(:focus-visible) {
     padding: 6px 14px;
   }
 
-  /* Project dots: color-only, touch-friendly */
+  /* Project dots: color-only, scrollable */
   .project-dot-name {
     display: none;
   }
 
   .project-dot-circle {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
   }
 
   .project-dot {
     padding: 4px;
-    min-width: 40px;
-    min-height: 40px;
+    flex-shrink: 0;
     justify-content: center;
   }
 
+  .project-dot.active {
+    outline-width: 2px;
+    outline-offset: -1px;
+  }
+
   .project-dots {
-    gap: 6px;
+    gap: 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     flex-shrink: 1;
     min-width: 0;
+    scrollbar-width: none;
+  }
+
+  .project-dots::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -2129,13 +2140,7 @@ textarea:focus:not(:focus-visible) {
   }
 
   .project-dots {
-    gap: 4px;
-  }
-
-  .project-dot {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 6px;
+    gap: 6px;
   }
 
   .lane-header {
