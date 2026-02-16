@@ -329,29 +329,22 @@ function getStorageUsageKB() {
 /** Debounced Firestore save timer. */
 let _firestoreSaveTimer = null;
 
-/**
- * Convert state to Firestore-safe format.
- * Firestore does not support nested arrays, so columns ([[id1],[id2,id3]])
- * is stored as a JSON string.
- */
-function stateToFirestore() {
-  const data = JSON.parse(JSON.stringify(state));
-  if (data.columns) {
-    data.columns = JSON.stringify(data.columns);
-  }
-  return data;
-}
-
 /** Save state to Firestore with 500ms debounce. */
 function saveToFirestore() {
   if (!currentUser) return;
   clearTimeout(_firestoreSaveTimer);
   _firestoreSaveTimer = setTimeout(() => {
-    console.log('[Firestore] 저장 시작...', { uid: currentUser.uid, updatedAt: state.updatedAt });
-    const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-    docRef.set(stateToFirestore())
+    const data = JSON.parse(JSON.stringify(state));
+    // 중첩 배열을 문자열로 변환
+    if (data.columns) {
+      data.columnsJSON = JSON.stringify(data.columns);
+      delete data.columns;
+    }
+    const docRef = db.collection('users').doc(currentUser.uid)
+      .collection('dashboard').doc('state');
+    docRef.set(data)
       .then(() => console.log('[Firestore] 저장 완료'))
-      .catch(err => console.warn('[Firestore] 저장 실패:', err));
+      .catch(err => console.error('[Firestore] 저장 실패:', err));
   }, 500);
 }
 
@@ -360,8 +353,14 @@ function flushFirestoreSave() {
   if (!currentUser || !_firestoreSaveTimer) return;
   clearTimeout(_firestoreSaveTimer);
   _firestoreSaveTimer = null;
-  const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-  docRef.set(stateToFirestore());
+  const data = JSON.parse(JSON.stringify(state));
+  if (data.columns) {
+    data.columnsJSON = JSON.stringify(data.columns);
+    delete data.columns;
+  }
+  const docRef = db.collection('users').doc(currentUser.uid)
+    .collection('dashboard').doc('state');
+  docRef.set(data);
 }
 
 /**
@@ -371,20 +370,19 @@ function flushFirestoreSave() {
 function applyRemoteState(remoteData) {
   state.projects = remoteData.projects || [];
   state.archive = remoteData.archive || [];
-  // columns: Firestore에서는 JSON 문자열로 저장됨
-  if (typeof remoteData.columns === 'string') {
-    try { state.columns = JSON.parse(remoteData.columns); } catch (e) { state.columns = null; }
+  // 문자열로 저장된 columns를 다시 배열로 변환
+  if (remoteData.columnsJSON) {
+    state.columns = JSON.parse(remoteData.columnsJSON);
   } else {
     state.columns = remoteData.columns || null;
   }
   state.settings = remoteData.settings || state.settings;
   state.version = remoteData.version || '2.0';
-  state.updatedAt = remoteData.updatedAt || new Date().toISOString();
+  state.updatedAt = remoteData.updatedAt || '';
   activeView = state.settings.lastActiveView || VIEWS.DASHBOARD;
   focusedProjectId = state.settings.lastFocusedProject || null;
-  // localStorage도 동기화
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
-  console.log('[Firestore] 원격 데이터 적용 완료', { projects: state.projects.length, updatedAt: state.updatedAt });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { /* ignore */ }
 }
 
 /**
