@@ -334,11 +334,21 @@ function saveToFirestore() {
   if (!currentUser) return;
   clearTimeout(_firestoreSaveTimer);
   _firestoreSaveTimer = setTimeout(() => {
+    console.log('[Firestore] 저장 시작...', { uid: currentUser.uid, updatedAt: state.updatedAt });
     const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-    docRef.set(JSON.parse(JSON.stringify(state))).catch(err => {
-      console.warn('Firestore 저장 실패 (localStorage 캐시는 유지됨):', err);
-    });
+    docRef.set(JSON.parse(JSON.stringify(state)))
+      .then(() => console.log('[Firestore] 저장 완료'))
+      .catch(err => console.warn('[Firestore] 저장 실패:', err));
   }, 500);
+}
+
+/** Flush pending Firestore save immediately (for beforeunload). */
+function flushFirestoreSave() {
+  if (!currentUser || !_firestoreSaveTimer) return;
+  clearTimeout(_firestoreSaveTimer);
+  _firestoreSaveTimer = null;
+  const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
+  docRef.set(JSON.parse(JSON.stringify(state)));
 }
 
 /**
@@ -356,41 +366,49 @@ function applyRemoteState(remoteData) {
   focusedProjectId = state.settings.lastFocusedProject || null;
   // localStorage도 동기화
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  console.log('[Firestore] 원격 데이터 적용 완료', { projects: state.projects.length, updatedAt: state.updatedAt });
 }
 
 /**
- * Load state from Firestore and handle conflict with localStorage.
+ * Load state from Firestore. On login, Firestore always wins.
+ * @param {boolean} [forceRemote=false] - true면 무조건 Firestore 데이터 적용
  * @returns {Promise<void>}
  */
-async function loadFromFirestore() {
+async function loadFromFirestore(forceRemote) {
   if (!currentUser) return;
+  console.log('[Firestore] 로드 시작...', { uid: currentUser.uid, forceRemote });
   try {
     const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-    const doc = await docRef.get({ source: 'server' });
+    const doc = await docRef.get();
+    console.log('[Firestore] 문서 존재:', doc.exists);
 
     if (doc.exists) {
       const remoteData = doc.data();
-      const remoteTime = remoteData.updatedAt ? new Date(remoteData.updatedAt).getTime() : 0;
-      const localTime = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
-      const localHasData = state.projects.length > 0 || state.archive.length > 0;
+      console.log('[Firestore] 원격 데이터:', { projects: (remoteData.projects || []).length, updatedAt: remoteData.updatedAt });
 
-      if (!localHasData || remoteTime >= localTime) {
-        // 로컬이 비어있거나 Firestore가 더 최신 → Firestore 데이터 사용
+      if (forceRemote) {
+        // 로그인 직후 or 수동 새로고침: 무조건 Firestore 우선
         applyRemoteState(remoteData);
       } else {
-        // localStorage가 더 최신이면 → Firestore에 업로드
-        saveToFirestore();
+        const remoteTime = remoteData.updatedAt ? new Date(remoteData.updatedAt).getTime() : 0;
+        const localTime = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
+        if (remoteTime >= localTime) {
+          applyRemoteState(remoteData);
+        } else {
+          console.log('[Firestore] 로컬이 더 최신 → Firestore에 업로드');
+          saveToFirestore();
+        }
       }
     } else {
-      // 첫 로그인 (Firestore에 문서 없음) → localStorage 데이터를 Firestore에 업로드
+      console.log('[Firestore] 문서 없음 (첫 로그인)');
+      // 첫 로그인: localStorage에 데이터가 있으면 업로드
       if (state.projects.length > 0 || state.archive.length > 0) {
         saveToFirestore();
       }
     }
     renderAll();
   } catch (err) {
-    console.warn('Firestore 로드 실패 (오프라인일 수 있음):', err);
-    // 오프라인이면 localStorage 데이터로 유지
+    console.warn('[Firestore] 로드 실패:', err);
     renderAll();
   }
 }
@@ -437,6 +455,7 @@ function updateAuthUI(user) {
 
 /** Sync button: force reload from Firestore. */
 async function syncFromCloud() {
+  console.log('[Sync] 수동 새로고침 시작');
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) {
     syncBtn.disabled = true;
@@ -444,7 +463,7 @@ async function syncFromCloud() {
   }
   try {
     if (currentUser) {
-      await loadFromFirestore();
+      await loadFromFirestore(true);
     } else {
       loadState();
       renderAll();
@@ -2233,15 +2252,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth 상태 리스너
   auth.onAuthStateChanged(user => {
+    console.log('[Auth] 상태 변경:', user ? user.email : '로그아웃');
     currentUser = user || null;
     updateAuthUI(user);
     if (user) {
-      // 로그인 시 Firestore에서 데이터 로드 (충돌 처리 포함)
-      loadFromFirestore();
+      // 로그인 시 무조건 Firestore 데이터 우선 적용
+      loadFromFirestore(true);
     } else {
       // 로그아웃 시 localStorage에서 다시 로드
       loadState();
       renderAll();
     }
   });
+
+  // 페이지 닫기 전 미저장 데이터 즉시 Firestore에 저장
+  window.addEventListener('beforeunload', flushFirestoreSave);
 });
