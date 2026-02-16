@@ -2242,19 +2242,39 @@ const debouncedSearch = debounce(query => {
 }, DEBOUNCE_DELAY);
 
 const searchClear = document.getElementById('search-clear');
+const searchBox = searchInput.closest('.search-box');
+
+// 검색 아이콘 클릭 시 검색창 확장 (모바일)
+searchBox.addEventListener('click', e => {
+  if (!searchBox.classList.contains('active') && !e.target.closest('input')) {
+    searchBox.classList.add('active');
+    searchInput.focus();
+  }
+});
 
 searchInput.addEventListener('input', () => {
   searchClear.hidden = !searchInput.value;
   debouncedSearch(searchInput.value);
 });
 
-searchClear.addEventListener('click', () => {
+searchClear.addEventListener('click', e => {
+  e.stopPropagation();
   searchInput.value = '';
   searchClear.hidden = true;
+  searchBox.classList.remove('active');
   activeView = viewBeforeSearch;
   renderAll();
   saveState();
 });
+
+// 검색창 외부 클릭 시 닫기 (모바일)
+document.addEventListener('click', e => {
+  if (searchBox.classList.contains('active') && !searchBox.contains(e.target)) {
+    if (!searchInput.value) {
+      searchBox.classList.remove('active');
+    }
+  }
+}, true);
 
 // ══════════════════════════════════════
 //  Init
