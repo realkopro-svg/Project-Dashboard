@@ -2241,8 +2241,19 @@ const debouncedSearch = debounce(query => {
   }
 }, DEBOUNCE_DELAY);
 
+const searchClear = document.getElementById('search-clear');
+
 searchInput.addEventListener('input', () => {
+  searchClear.hidden = !searchInput.value;
   debouncedSearch(searchInput.value);
+});
+
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  searchClear.hidden = true;
+  activeView = viewBeforeSearch;
+  renderAll();
+  saveState();
 });
 
 // ══════════════════════════════════════
