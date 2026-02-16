@@ -2253,16 +2253,16 @@ searchBox.addEventListener('click', e => {
 });
 
 searchInput.addEventListener('input', () => {
-  searchClear.hidden = !searchInput.value;
+  searchClear.classList.toggle('visible', !!searchInput.value);
   debouncedSearch(searchInput.value);
 });
 
 searchClear.addEventListener('click', e => {
   e.stopPropagation();
   searchInput.value = '';
-  searchClear.hidden = true;
+  searchClear.classList.remove('visible');
   searchBox.classList.remove('active');
-  activeView = viewBeforeSearch;
+  activeView = viewBeforeSearch || VIEWS.DASHBOARD;
   renderAll();
   saveState();
 });
