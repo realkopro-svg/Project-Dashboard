@@ -1743,34 +1743,34 @@ textarea:focus:not(:focus-visible) {
    Responsive
    �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧 */
 
-/* Small mobile < 480px */
-@media (max-width: 479px) {
+/* PWA safe area */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .navbar {
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+  #page-wrapper {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* All mobile < 768px */
+@media (max-width: 767px) {
+  /* Navbar 2-row layout */
   .navbar {
     flex-wrap: wrap;
     height: auto;
     padding: 8px 10px;
-    gap: 6px;
+    gap: 4px;
   }
 
   .navbar-left {
     order: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  .app-title {
-    font-size: 14px;
-  }
-
-  .navbar-date {
-    font-size: 11px;
   }
 
   .navbar-right {
     order: 2;
     margin-left: auto;
-    gap: 4px;
+    gap: 2px;
   }
 
   .navbar-center {
@@ -1778,66 +1778,84 @@ textarea:focus:not(:focus-visible) {
     width: 100%;
   }
 
-  .view-tabs {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .view-tab {
-    padding: 5px 10px;
-    font-size: 12px;
-  }
-
+  /* Search: icon-only on mobile, expand on focus */
   .search-box {
     padding: 4px 8px;
+    transition: width 0.2s ease;
   }
 
   .search-box input {
-    width: 80px;
-    font-size: 12px;
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    transition: width 0.2s ease, opacity 0.2s ease;
   }
 
-  .settings-btn {
-    font-size: 18px;
+  .search-box:focus-within input {
+    width: 120px;
+    padding: 6px 8px;
+    opacity: 1;
   }
 
+  /* Auth area compact */
   .auth-btn {
-    padding: 4px 8px;
+    padding: 6px 8px;
     font-size: 11px;
-  }
-
-  .user-avatar {
-    width: 20px;
-    height: 20px;
   }
 
   .user-name {
     display: none;
   }
 
-  .summary-bar {
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px 10px;
+  .user-avatar {
+    width: 28px;
+    height: 28px;
   }
 
-  .summary-progress-bar {
-    max-width: 100%;
+  /* Touch-friendly icon buttons: min 44px tap target */
+  .settings-btn,
+  .sync-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
   }
 
-  .summary-progress-text {
-    font-size: 11px;
+  .lane-menu-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
   }
 
-  .project-dots {
-    gap: 8px;
+  .card-checkbox {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
   }
 
-  .project-dot-name {
-    font-size: 10px;
-    max-width: 40px;
+  .btn-delete-card {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    opacity: 1;
   }
 
+  /* Lane height limit + internal scroll */
+  .card-list {
+    max-height: 60vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Board layout */
   .board-container {
     padding: 8px;
     gap: 12px;
@@ -1853,16 +1871,137 @@ textarea:focus:not(:focus-visible) {
     min-width: 100%;
   }
 
+  /* Summary bar */
+  .summary-bar {
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .summary-progress-bar {
+    max-width: 100%;
+  }
+
+  /* Quick add touch-friendly */
+  .quick-add-input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .quick-add-textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .quick-add-submit {
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .quick-add-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal bottom-sheet style */
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px;
+    max-height: 85vh;
+    margin-top: auto;
+  }
+
+  .modal-overlay {
+    align-items: flex-end;
+  }
+
+  .modal-btn {
+    min-height: 44px;
+    padding: 10px 20px;
+  }
+
+  .modal-input {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  /* Archive touch-friendly */
+  .archive-toggle {
+    min-height: 48px;
+    padding: 12px;
+  }
+
+  .archive-restore-btn,
+  .archive-delete-btn {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  /* Color swatches bigger for touch */
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Settings buttons touch-friendly */
+  .settings-action-btn {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
+  /* View tabs touch-friendly */
+  .view-tab {
+    min-height: 36px;
+    padding: 6px 14px;
+  }
+}
+
+/* Small mobile < 480px (overrides on top of shared mobile rules) */
+@media (max-width: 479px) {
+  .navbar-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .app-title {
+    font-size: 14px;
+  }
+
+  .navbar-date {
+    font-size: 11px;
+  }
+
+  .view-tab {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .summary-progress-text {
+    font-size: 11px;
+  }
+
+  .project-dots {
+    gap: 8px;
+  }
+
+  .project-dot-name {
+    font-size: 10px;
+    max-width: 40px;
+  }
+
   .lane-header {
     padding: 10px 10px 6px;
   }
 
   .lane-name {
     font-size: 14px;
-  }
-
-  .card-list {
-    padding: 4px 10px;
   }
 
   .card {
@@ -1909,28 +2048,6 @@ textarea:focus:not(:focus-visible) {
     font-size: 28px;
   }
 
-  .quick-add {
-    padding: 6px 10px 10px;
-  }
-
-  .quick-add-input {
-    font-size: 12px;
-    padding: 6px 8px;
-  }
-
-  .quick-add-textarea {
-    font-size: 12px;
-    min-height: 50px;
-  }
-
-  .quick-add-options {
-    gap: 8px;
-  }
-
-  .quick-add-type-label {
-    font-size: 11px;
-  }
-
   .focus-view {
     padding: 16px 10px;
   }
@@ -1970,11 +2087,6 @@ textarea:focus:not(:focus-visible) {
     font-size: 15px;
   }
 
-  .archive-toggle {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
   .archive-list {
     padding: 0 12px 12px;
   }
@@ -1992,116 +2104,25 @@ textarea:focus:not(:focus-visible) {
     font-size: 11px;
   }
 
-  .archive-restore-btn,
-  .archive-delete-btn {
-    padding: 3px 8px;
-    font-size: 11px;
-  }
-
-  .modal {
-    width: 96%;
-    padding: 16px;
-    border-radius: 10px;
-  }
-
   .modal-title {
     font-size: 16px;
     margin-bottom: 14px;
-  }
-
-  .modal-input {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .modal-btn {
-    padding: 7px 14px;
-    font-size: 13px;
-  }
-
-  .settings-action-btn {
-    padding: 10px 12px;
-    font-size: 13px;
   }
 
   .storage-warning-banner {
     padding: 8px 10px;
     font-size: 12px;
   }
-
-  .color-palette {
-    gap: 6px;
-  }
-
-  .color-swatch {
-    width: 24px;
-    height: 24px;
-  }
 }
 
-/* Mobile 480px-767px */
+/* Mobile 480px-767px (overrides on top of shared mobile rules) */
 @media (min-width: 480px) and (max-width: 767px) {
-  .navbar {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 10px 12px;
-    gap: 8px;
-  }
-
-  .navbar-left {
-    order: 1;
-  }
-
   .app-title {
     font-size: 16px;
   }
 
   .navbar-date {
     font-size: 12px;
-  }
-
-  .navbar-right {
-    order: 2;
-    margin-left: auto;
-  }
-
-  .navbar-center {
-    order: 3;
-    width: 100%;
-  }
-
-  .view-tabs {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .search-box input {
-    width: 100px;
-  }
-
-  .summary-bar {
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px;
-  }
-
-  .summary-progress-bar {
-    max-width: 100%;
-  }
-
-  .board-container {
-    padding: 12px;
-    gap: 14px;
-  }
-
-  .board-column {
-    width: 100%;
-    min-width: 100%;
-  }
-
-  .project-lane {
-    width: 100%;
-    min-width: 100%;
   }
 
   .welcome-empty {
@@ -2122,11 +2143,6 @@ textarea:focus:not(:focus-visible) {
 
   .list-view-title {
     font-size: 19px;
-  }
-
-  .modal {
-    width: 95%;
-    padding: 20px;
   }
 }
 
