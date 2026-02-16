@@ -2128,10 +2128,23 @@ function renderSummaryBar() {
 
   projectDots.textContent = '';
   state.projects.forEach(project => {
-    const dot = el('div', { className: 'project-dot', children: [
-      el('div', { className: 'project-dot-circle', style: { background: project.color } }),
-      el('span', { className: 'project-dot-name', text: project.name })
-    ]});
+    const isActive = activeView === VIEWS.FOCUS && focusedProjectId === project.id;
+    const dot = el('div', {
+      className: 'project-dot' + (isActive ? ' active' : ''),
+      attrs: { title: project.name, role: 'button', tabindex: '0', 'aria-label': project.name + ' 포커스 뷰' },
+      children: [
+        el('div', { className: 'project-dot-circle', style: { background: project.color } }),
+        el('span', { className: 'project-dot-name', text: project.name })
+      ]
+    });
+    const goFocus = () => {
+      focusedProjectId = project.id;
+      activeView = VIEWS.FOCUS;
+      renderAll();
+      saveState();
+    };
+    dot.addEventListener('click', goFocus);
+    dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goFocus(); } });
     projectDots.appendChild(dot);
   });
 }
