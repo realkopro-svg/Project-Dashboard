@@ -238,22 +238,27 @@ textarea:focus:not(:focus-visible) {
 }
 
 .search-clear {
+  display: none;
   font-size: 16px;
   color: var(--color-text-secondary);
   padding: 2px 4px;
   border-radius: 50%;
   line-height: 1;
   flex-shrink: 0;
+  min-width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
   transition: color 0.15s ease, background 0.15s ease;
+}
+
+.search-clear.visible {
+  display: flex;
 }
 
 .search-clear:hover {
   color: var(--color-text);
   background: var(--color-border);
-}
-
-.search-clear[hidden] {
-  display: none;
 }
 
 /* Auth Area */
@@ -1838,8 +1843,8 @@ textarea:focus:not(:focus-visible) {
     pointer-events: auto;
   }
 
-  .search-box.active .search-clear {
-    display: block;
+  .search-box.active .search-clear.visible {
+    display: flex;
   }
 
   /* Auth area compact */
