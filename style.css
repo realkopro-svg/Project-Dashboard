@@ -1998,6 +1998,14 @@ textarea:focus:not(:focus-visible) {
     max-width: 100%;
   }
 
+  .add-project-btn {
+    display: none;
+  }
+
+  .summary-right {
+    width: 100%;
+  }
+
   /* Quick add touch-friendly */
   .quick-add-input {
     padding: 10px 12px;
@@ -2077,18 +2085,18 @@ textarea:focus:not(:focus-visible) {
     padding: 6px 14px;
   }
 
-  /* Project dots: color-only, scrollable */
+  /* Project dots: color-only, scrollable, 12 per row */
   .project-dot-name {
     display: none;
   }
 
   .project-dot-circle {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   .project-dot {
-    padding: 4px;
+    padding: 3px;
     flex-shrink: 0;
     justify-content: center;
   }
@@ -2099,13 +2107,12 @@ textarea:focus:not(:focus-visible) {
   }
 
   .project-dots {
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap;
     white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 0;
+    width: 100%;
     scrollbar-width: none;
   }
 
