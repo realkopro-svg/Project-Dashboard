@@ -458,6 +458,20 @@ textarea:focus:not(:focus-visible) {
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: background 0.15s ease;
+}
+
+.project-dot:hover {
+  background: var(--color-bg);
+}
+
+.project-dot.active {
+  background: var(--color-bg);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .project-dot-circle {
@@ -2090,7 +2104,12 @@ textarea:focus:not(:focus-visible) {
   }
 
   .project-dots {
-    gap: 8px;
+    gap: 4px;
+  }
+
+  .project-dot {
+    min-height: 44px;
+    padding: 4px 6px;
   }
 
   .project-dot-name {
