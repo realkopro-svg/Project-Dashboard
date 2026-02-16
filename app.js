@@ -329,6 +329,19 @@ function getStorageUsageKB() {
 /** Debounced Firestore save timer. */
 let _firestoreSaveTimer = null;
 
+/**
+ * Convert state to Firestore-safe format.
+ * Firestore does not support nested arrays, so columns ([[id1],[id2,id3]])
+ * is stored as a JSON string.
+ */
+function stateToFirestore() {
+  const data = JSON.parse(JSON.stringify(state));
+  if (data.columns) {
+    data.columns = JSON.stringify(data.columns);
+  }
+  return data;
+}
+
 /** Save state to Firestore with 500ms debounce. */
 function saveToFirestore() {
   if (!currentUser) return;
@@ -336,7 +349,7 @@ function saveToFirestore() {
   _firestoreSaveTimer = setTimeout(() => {
     console.log('[Firestore] 저장 시작...', { uid: currentUser.uid, updatedAt: state.updatedAt });
     const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-    docRef.set(JSON.parse(JSON.stringify(state)))
+    docRef.set(stateToFirestore())
       .then(() => console.log('[Firestore] 저장 완료'))
       .catch(err => console.warn('[Firestore] 저장 실패:', err));
   }, 500);
@@ -348,7 +361,7 @@ function flushFirestoreSave() {
   clearTimeout(_firestoreSaveTimer);
   _firestoreSaveTimer = null;
   const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-  docRef.set(JSON.parse(JSON.stringify(state)));
+  docRef.set(stateToFirestore());
 }
 
 /**
@@ -358,7 +371,12 @@ function flushFirestoreSave() {
 function applyRemoteState(remoteData) {
   state.projects = remoteData.projects || [];
   state.archive = remoteData.archive || [];
-  state.columns = remoteData.columns || null;
+  // columns: Firestore에서는 JSON 문자열로 저장됨
+  if (typeof remoteData.columns === 'string') {
+    try { state.columns = JSON.parse(remoteData.columns); } catch (e) { state.columns = null; }
+  } else {
+    state.columns = remoteData.columns || null;
+  }
   state.settings = remoteData.settings || state.settings;
   state.version = remoteData.version || '2.0';
   state.updatedAt = remoteData.updatedAt || new Date().toISOString();
