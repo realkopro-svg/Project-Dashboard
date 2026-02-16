@@ -2244,19 +2244,21 @@ const debouncedSearch = debounce(query => {
 const searchClear = document.getElementById('search-clear');
 const searchBox = searchInput.closest('.search-box');
 
-// 검색 아이콘 클릭 시 검색창 확장 (모바일)
+// 검색 아이콘 클릭 → 검색창 열기 (모바일에서 오버레이)
 searchBox.addEventListener('click', e => {
   if (!searchBox.classList.contains('active') && !e.target.closest('input')) {
     searchBox.classList.add('active');
-    searchInput.focus();
+    requestAnimationFrame(() => searchInput.focus());
   }
 });
 
+// 입력 시 X 버튼 표시 + 검색 실행
 searchInput.addEventListener('input', () => {
   searchClear.classList.toggle('visible', !!searchInput.value);
   debouncedSearch(searchInput.value);
 });
 
+// X 버튼 → 검색 닫기
 searchClear.addEventListener('click', e => {
   e.stopPropagation();
   searchInput.value = '';
@@ -2267,14 +2269,8 @@ searchClear.addEventListener('click', e => {
   saveState();
 });
 
-// 검색창 외부 클릭 시 닫기 (모바일)
-document.addEventListener('click', e => {
-  if (searchBox.classList.contains('active') && !searchBox.contains(e.target)) {
-    if (!searchInput.value) {
-      searchBox.classList.remove('active');
-    }
-  }
-}, true);
+// 모바일 프로젝트 추가 버튼
+document.getElementById('mobile-add-btn').addEventListener('click', showCreateProjectModal);
 
 // ══════════════════════════════════════
 //  Init
