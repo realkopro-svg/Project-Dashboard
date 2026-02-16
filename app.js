@@ -57,7 +57,7 @@ let state = {
   columns: null,
   settings: { lastActiveView: VIEWS.DASHBOARD, lastFocusedProject: null },
   version: '2.0',
-  updatedAt: new Date().toISOString()
+  updatedAt: ''
 };
 
 /** @type {string} Current active view */
@@ -342,6 +342,23 @@ function saveToFirestore() {
 }
 
 /**
+ * Apply remote Firestore data to local state.
+ * @param {object} remoteData - Firestore document data
+ */
+function applyRemoteState(remoteData) {
+  state.projects = remoteData.projects || [];
+  state.archive = remoteData.archive || [];
+  state.columns = remoteData.columns || null;
+  state.settings = remoteData.settings || state.settings;
+  state.version = remoteData.version || '2.0';
+  state.updatedAt = remoteData.updatedAt || new Date().toISOString();
+  activeView = state.settings.lastActiveView || VIEWS.DASHBOARD;
+  focusedProjectId = state.settings.lastFocusedProject || null;
+  // localStorage도 동기화
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+}
+
+/**
  * Load state from Firestore and handle conflict with localStorage.
  * @returns {Promise<void>}
  */
@@ -349,35 +366,32 @@ async function loadFromFirestore() {
   if (!currentUser) return;
   try {
     const docRef = db.collection('users').doc(currentUser.uid).collection('dashboard').doc('state');
-    const doc = await docRef.get();
+    const doc = await docRef.get({ source: 'server' });
+
     if (doc.exists) {
       const remoteData = doc.data();
       const remoteTime = remoteData.updatedAt ? new Date(remoteData.updatedAt).getTime() : 0;
       const localTime = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
+      const localHasData = state.projects.length > 0 || state.archive.length > 0;
 
-      if (remoteTime >= localTime) {
-        // Firestore 데이터가 더 최신이거나 같으면 → Firestore 데이터 사용
-        state.projects = remoteData.projects || [];
-        state.archive = remoteData.archive || [];
-        state.columns = remoteData.columns || null;
-        state.settings = remoteData.settings || state.settings;
-        state.version = remoteData.version || '2.0';
-        state.updatedAt = remoteData.updatedAt || new Date().toISOString();
-        activeView = state.settings.lastActiveView || VIEWS.DASHBOARD;
-        focusedProjectId = state.settings.lastFocusedProject || null;
-        // localStorage도 동기화
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+      if (!localHasData || remoteTime >= localTime) {
+        // 로컬이 비어있거나 Firestore가 더 최신 → Firestore 데이터 사용
+        applyRemoteState(remoteData);
       } else {
         // localStorage가 더 최신이면 → Firestore에 업로드
         saveToFirestore();
       }
     } else {
       // 첫 로그인 (Firestore에 문서 없음) → localStorage 데이터를 Firestore에 업로드
-      saveToFirestore();
+      if (state.projects.length > 0 || state.archive.length > 0) {
+        saveToFirestore();
+      }
     }
     renderAll();
   } catch (err) {
-    console.warn('Firestore 로드 실패:', err);
+    console.warn('Firestore 로드 실패 (오프라인일 수 있음):', err);
+    // 오프라인이면 localStorage 데이터로 유지
+    renderAll();
   }
 }
 
@@ -418,6 +432,28 @@ function updateAuthUI(user) {
   } else {
     loginBtn.hidden = false;
     userProfile.hidden = true;
+  }
+}
+
+/** Sync button: force reload from Firestore. */
+async function syncFromCloud() {
+  const syncBtn = document.getElementById('sync-btn');
+  if (syncBtn) {
+    syncBtn.disabled = true;
+    syncBtn.classList.add('syncing');
+  }
+  try {
+    if (currentUser) {
+      await loadFromFirestore();
+    } else {
+      loadState();
+      renderAll();
+    }
+  } finally {
+    if (syncBtn) {
+      syncBtn.disabled = false;
+      syncBtn.classList.remove('syncing');
+    }
   }
 }
 
@@ -2190,9 +2226,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadState();
   renderAll();
 
-  // Auth 버튼 이벤트 바인딩
+  // Auth + Sync 버튼 이벤트 바인딩
   document.getElementById('login-btn').addEventListener('click', signInWithGoogle);
   document.getElementById('logout-btn').addEventListener('click', signOutUser);
+  document.getElementById('sync-btn').addEventListener('click', syncFromCloud);
 
   // Auth 상태 리스너
   auth.onAuthStateChanged(user => {
