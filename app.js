@@ -596,38 +596,33 @@ function deleteProject(id, fromArchive) {
  */
 function reorderProject(draggedId, targetId, position) {
   if (draggedId === targetId) return;
-  initColumns();
 
-  // Remove dragged from its current column
-  for (let i = 0; i < state.columns.length; i++) {
-    const ri = state.columns[i].indexOf(draggedId);
-    if (ri !== -1) { state.columns[i].splice(ri, 1); break; }
-  }
-  state.columns = state.columns.filter(col => col.length > 0);
+  // Build ordered ID list
+  const sorted = [...state.projects].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const ids = sorted.map(p => p.id);
 
-  // Find target after cleanup
-  let targetCol = -1, targetRow = -1;
-  state.columns.forEach((col, ci) => {
-    const ri = col.indexOf(targetId);
-    if (ri !== -1) { targetCol = ci; targetRow = ri; }
-  });
-  if (targetCol === -1) return;
+  // Remove dragged
+  const dragIdx = ids.indexOf(draggedId);
+  if (dragIdx === -1) return;
+  ids.splice(dragIdx, 1);
 
+  // Find target
+  const targetIdx = ids.indexOf(targetId);
+  if (targetIdx === -1) return;
+
+  // Insert before (left) or after (right)
   if (position === 'left') {
-    state.columns.splice(targetCol, 0, [draggedId]);
-  } else if (position === 'right') {
-    state.columns.splice(targetCol + 1, 0, [draggedId]);
-  } else if (position === 'top') {
-    state.columns[targetCol].splice(targetRow, 0, draggedId);
+    ids.splice(targetIdx, 0, draggedId);
   } else {
-    state.columns[targetCol].splice(targetRow + 1, 0, draggedId);
+    ids.splice(targetIdx + 1, 0, draggedId);
   }
 
-  let order = 0;
-  state.columns.flat().forEach(id => {
+  // Update order
+  ids.forEach((id, i) => {
     const p = state.projects.find(p => p.id === id);
-    if (p) p.order = order++;
+    if (p) p.order = i;
   });
+  state.columns = ids.map(id => [id]);
   saveState();
   renderAll();
 }
@@ -1348,33 +1343,15 @@ function showDeleteProjectModal(project, fromArchive) {
     container.setAttribute('aria-label', '프로젝트 삭제 확인');
     const title = el('h2', { className: 'modal-title', text: '프로젝트 삭제' });
     const warning = el('p', { className: 'modal-warning' });
-    warning.textContent = `"${project.name}" 프로젝트를 영구 삭제합니다. 확인하려면 프로젝트 이름을 입력하세요.`;
-
-    const field = el('div', { className: 'modal-field' });
-    const input = el('input', {
-      className: 'modal-input',
-      attrs: { type: 'text', placeholder: project.name, 'aria-label': '프로젝트 이름 확인' }
-    });
-    field.appendChild(input);
+    warning.textContent = `"${project.name}" 프로젝트를 영구 삭제하시겠습니까?`;
 
     const actions = el('div', { className: 'modal-actions' });
     const cancelBtn = el('button', { className: 'modal-btn modal-btn-cancel', text: '취소' });
     cancelBtn.addEventListener('click', closeModal);
-    const delBtn = el('button', { className: 'modal-btn modal-btn-danger', text: '삭제', attrs: { disabled: '' } });
-
-    input.addEventListener('input', () => {
-      delBtn.toggleAttribute('disabled', input.value !== project.name);
-    });
-    delBtn.addEventListener('click', () => {
-      if (input.value === project.name) { deleteProject(project.id, fromArchive); closeModal(); }
-    });
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && input.value === project.name) delBtn.click();
-      if (e.key === 'Escape') closeModal();
-    });
+    const delBtn = el('button', { className: 'modal-btn modal-btn-danger', text: '삭제' });
+    delBtn.addEventListener('click', () => { deleteProject(project.id, fromArchive); closeModal(); });
     actions.append(cancelBtn, delBtn);
-    container.append(title, warning, field, actions);
-    requestAnimationFrame(() => input.focus());
+    container.append(title, warning, actions);
   });
 }
 
@@ -1466,7 +1443,7 @@ function showLaneDropdown(projectId, anchorEl) {
 
   const items = [
     { text: '\u270F\uFE0F 이름 변경', action: () => { closeAllPopups(); startInlineRename(projectId); } },
-    { text: '\uD83C\uDFA8 컬러 변경', action: () => { closeAllPopups(); showColorPopover(projectId, anchorEl); } },
+    { text: '\uD83C\uDFA8 컬러 변경', action: (e) => { e.stopPropagation(); closeAllPopups(); showColorPopover(projectId, anchorEl); } },
     { text: '\uD83D\uDCE6 아카이브', action: () => { closeAllPopups(); if (confirm('이 프로젝트를 아카이브하시겠습니까?')) archiveProject(projectId); } },
     'divider',
     { text: '\uD83D\uDDD1\uFE0F 삭제', cls: 'danger', action: () => { closeAllPopups(); const p = state.projects.find(x => x.id === projectId); if (p) showDeleteProjectModal(p, false); } }
@@ -1618,14 +1595,9 @@ function renderDashboard() {
     welcome.appendChild(addBtn);
     container.appendChild(welcome);
   } else {
-    initColumns();
-    state.columns.forEach(colIds => {
-      const column = el('div', { className: 'board-column' });
-      colIds.forEach(id => {
-        const project = state.projects.find(p => p.id === id);
-        if (project) column.appendChild(renderProjectLane(project));
-      });
-      container.appendChild(column);
+    const sorted = [...state.projects].sort((a, b) => (a.order || 0) - (b.order || 0));
+    sorted.forEach(project => {
+      container.appendChild(renderProjectLane(project));
     });
   }
 
@@ -1682,7 +1654,7 @@ function renderProjectLane(project) {
   header.append(headerTop, progressRow);
   lane.appendChild(header);
 
-  // Mouse-based drag to reorder (column-aware)
+  // Mouse-based drag to reorder (left/right swap)
   function initDrag(startX, startY) {
     const boardContainer = lane.closest('.board-container');
     if (!boardContainer) return;
@@ -1690,7 +1662,6 @@ function renderProjectLane(project) {
     const offsetX = startX - laneRect.left;
     const offsetY = startY - laneRect.top;
 
-    // Create a floating ghost clone
     const ghost = lane.cloneNode(true);
     ghost.style.position = 'fixed';
     ghost.style.left = laneRect.left + 'px';
@@ -1730,46 +1701,29 @@ function renderProjectLane(project) {
 
       if (closestLane) {
         const rect = closestLane.getBoundingClientRect();
-        const distLeft = Math.abs(cx - rect.left);
-        const distRight = Math.abs(cx - rect.right);
-        const distTop = Math.abs(cy - rect.top);
-        const distBottom = Math.abs(cy - rect.bottom);
-        const minDist = Math.min(distLeft, distRight, distTop, distBottom);
-
-        let direction;
-        if (minDist === distTop) direction = 'top';
-        else if (minDist === distBottom) direction = 'bottom';
-        else if (minDist === distLeft) direction = 'left';
-        else direction = 'right';
+        // Detect layout: vertical stack if lane fills container width
+        const isVertical = closestLane.offsetWidth >= boardContainer.offsetWidth * 0.8;
+        const isBefore = isVertical
+          ? cy < rect.top + rect.height / 2
+          : cx < rect.left + rect.width / 2;
 
         lastDropTarget = closestLane.dataset.projectId;
-        lastDropPosition = direction;
+        lastDropPosition = isBefore ? 'left' : 'right';
 
-        const targetColumn = closestLane.closest('.board-column');
         const indicator = el('div', { className: 'lane-drop-indicator' });
-
-        if (direction === 'left' || direction === 'right') {
-          indicator.classList.add('vertical');
-          indicator.style.height = targetColumn.offsetHeight + 'px';
-          if (direction === 'left') {
-            boardContainer.insertBefore(indicator, targetColumn);
-          } else {
-            if (targetColumn.nextSibling) {
-              boardContainer.insertBefore(indicator, targetColumn.nextSibling);
-            } else {
-              boardContainer.appendChild(indicator);
-            }
-          }
-        } else {
+        if (isVertical) {
           indicator.classList.add('horizontal');
-          if (direction === 'top') {
-            targetColumn.insertBefore(indicator, closestLane);
+        } else {
+          indicator.classList.add('vertical');
+          indicator.style.height = closestLane.offsetHeight + 'px';
+        }
+        if (isBefore) {
+          boardContainer.insertBefore(indicator, closestLane);
+        } else {
+          if (closestLane.nextSibling) {
+            boardContainer.insertBefore(indicator, closestLane.nextSibling);
           } else {
-            if (closestLane.nextElementSibling) {
-              targetColumn.insertBefore(indicator, closestLane.nextElementSibling);
-            } else {
-              targetColumn.appendChild(indicator);
-            }
+            boardContainer.appendChild(indicator);
           }
         }
       } else {
@@ -1804,12 +1758,12 @@ function renderProjectLane(project) {
 
   // Drag from header area (excluding interactive elements)
   header.addEventListener('mousedown', e => {
-    if (e.target.closest('.lane-menu-btn') || e.target.closest('.lane-name') || e.target.closest('.lane-name-input')) return;
+    if (e.target.closest('.lane-menu-btn') || e.target.closest('.lane-name') || e.target.closest('.lane-name-input') || e.target.closest('.lane-dropdown') || e.target.closest('.color-popover')) return;
     e.preventDefault();
     initDrag(e.clientX, e.clientY);
   });
   header.addEventListener('touchstart', e => {
-    if (e.target.closest('.lane-menu-btn') || e.target.closest('.lane-name') || e.target.closest('.lane-name-input')) return;
+    if (e.target.closest('.lane-menu-btn') || e.target.closest('.lane-name') || e.target.closest('.lane-name-input') || e.target.closest('.lane-dropdown') || e.target.closest('.color-popover')) return;
     const t = e.touches[0];
     initDrag(t.clientX, t.clientY);
   }, { passive: true });
