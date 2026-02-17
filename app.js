@@ -589,10 +589,10 @@ function deleteProject(id, fromArchive) {
 }
 
 /**
- * Reorder a project using column-aware positioning.
+ * Reorder a project by left/right swap.
  * @param {string} draggedId - The project being dragged
  * @param {string} targetId - The project to drop onto
- * @param {string} position - 'left', 'right', 'top', or 'bottom'
+ * @param {string} position - 'left' (before) or 'right' (after)
  */
 function reorderProject(draggedId, targetId, position) {
   if (draggedId === targetId) return;
@@ -1654,32 +1654,43 @@ function renderProjectLane(project) {
   header.append(headerTop, progressRow);
   lane.appendChild(header);
 
-  // Mouse-based drag to reorder (left/right swap)
+  // Mouse-based drag to reorder (left/right swap, with drag threshold)
   function initDrag(startX, startY) {
     const boardContainer = lane.closest('.board-container');
     if (!boardContainer) return;
-    const laneRect = lane.getBoundingClientRect();
-    const offsetX = startX - laneRect.left;
-    const offsetY = startY - laneRect.top;
-
-    const ghost = lane.cloneNode(true);
-    ghost.style.position = 'fixed';
-    ghost.style.left = laneRect.left + 'px';
-    ghost.style.top = laneRect.top + 'px';
-    ghost.style.width = laneRect.width + 'px';
-    ghost.style.zIndex = '1000';
-    ghost.style.pointerEvents = 'none';
-    ghost.style.boxShadow = '0 12px 40px rgba(0,0,0,0.25)';
-    ghost.style.opacity = '0.9';
-    ghost.style.transition = 'none';
-    ghost.classList.add('lane-dragging');
-    document.body.appendChild(ghost);
-
-    lane.classList.add('lane-dragging');
+    const DRAG_THRESHOLD = 5;
+    let dragging = false;
+    let ghost = null;
+    let offsetX, offsetY;
     let lastDropTarget = null;
     let lastDropPosition = null;
 
+    function startActualDrag(cx, cy) {
+      dragging = true;
+      const laneRect = lane.getBoundingClientRect();
+      offsetX = startX - laneRect.left;
+      offsetY = startY - laneRect.top;
+
+      ghost = lane.cloneNode(true);
+      ghost.style.position = 'fixed';
+      ghost.style.left = laneRect.left + 'px';
+      ghost.style.top = laneRect.top + 'px';
+      ghost.style.width = laneRect.width + 'px';
+      ghost.style.zIndex = '1000';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.boxShadow = '0 12px 40px rgba(0,0,0,0.25)';
+      ghost.style.opacity = '0.9';
+      ghost.style.transition = 'none';
+      ghost.classList.add('lane-dragging');
+      document.body.appendChild(ghost);
+      lane.classList.add('lane-dragging');
+    }
+
     function onMove(cx, cy) {
+      if (!dragging) {
+        if (Math.hypot(cx - startX, cy - startY) < DRAG_THRESHOLD) return;
+        startActualDrag(cx, cy);
+      }
       ghost.style.left = (cx - offsetX) + 'px';
       ghost.style.top = (cy - offsetY) + 'px';
 
@@ -1701,7 +1712,6 @@ function renderProjectLane(project) {
 
       if (closestLane) {
         const rect = closestLane.getBoundingClientRect();
-        // Detect layout: vertical stack if lane fills container width
         const isVertical = closestLane.offsetWidth >= boardContainer.offsetWidth * 0.8;
         const isBefore = isVertical
           ? cy < rect.top + rect.height / 2
@@ -1733,10 +1743,10 @@ function renderProjectLane(project) {
     }
 
     function onEnd() {
-      ghost.remove();
+      if (ghost) ghost.remove();
       lane.classList.remove('lane-dragging');
       clearDropIndicators();
-      if (lastDropTarget && lastDropTarget !== project.id) {
+      if (dragging && lastDropTarget && lastDropTarget !== project.id) {
         reorderProject(project.id, lastDropTarget, lastDropPosition);
       }
       document.removeEventListener('mousemove', onMouseMove);
