@@ -580,14 +580,6 @@ textarea:focus:not(:focus-visible) {
   transform: scale(0.97);
 }
 
-.board-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex-shrink: 0;
-  width: var(--lane-width);
-  min-width: var(--lane-width);
-}
 
 .lane-drop-indicator {
   flex-shrink: 0;
@@ -1975,11 +1967,6 @@ textarea:focus:not(:focus-visible) {
   .board-container {
     padding: 8px;
     gap: 12px;
-  }
-
-  .board-column {
-    width: 100%;
-    min-width: 100%;
   }
 
   .project-lane {
